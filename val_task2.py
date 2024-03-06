@@ -14,7 +14,7 @@ def task2(args):
     result_path = 'result/task2'
     os.makedirs(result_path, exist_ok=True)
 
-    task2_dataset_val = HuMobDatasetTask2Val('./data/task2_dataset_kotae.csv')
+    task2_dataset_val = HuMobDatasetTask2Val('./data/yjmob100k-dataset2.csv')
     task2_dataloader_val = DataLoader(task2_dataset_val, batch_size=1, num_workers=args.num_workers)
 
     device = torch.device(f'cuda:{args.cuda}')
