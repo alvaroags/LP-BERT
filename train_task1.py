@@ -25,7 +25,8 @@ def set_random_seed(seed=0):
 
 
 def collate_fn(batch):
-    d = [item['d'] for item in batch]
+    # Comentando a parte relacionada ao dayembedding
+    # d = [item['d'] for item in batch]
     t = [item['t'] for item in batch]
     input_x = [item['input_x'] for item in batch]
     input_y = [item['input_y'] for item in batch]
@@ -34,7 +35,8 @@ def collate_fn(batch):
     label_y = [item['label_y'] for item in batch]
     len_tensor = torch.tensor([item['len'] for item in batch])
 
-    d_padded = pad_sequence(d, batch_first=True, padding_value=0)
+    # Comentando a parte relacionada ao dayembedding
+    # d_padded = pad_sequence(d, batch_first=True, padding_value=0)
     t_padded = pad_sequence(t, batch_first=True, padding_value=0)
     input_x_padded = pad_sequence(input_x, batch_first=True, padding_value=0)
     input_y_padded = pad_sequence(input_y, batch_first=True, padding_value=0)
@@ -43,7 +45,8 @@ def collate_fn(batch):
     label_y_padded = pad_sequence(label_y, batch_first=True, padding_value=0)
 
     return {
-        'd': d_padded,
+        # Comentando a parte relacionada ao dayembedding
+        # 'd': d_padded,
         't': t_padded,
         'input_x': input_x_padded,
         'input_y': input_y_padded,
@@ -86,7 +89,7 @@ def task1(args):
 
     for epoch_id in range(args.epochs):
         for batch_id, batch in enumerate(tqdm(task1_dataloader_train)):
-            batch['d'] = batch['d'].to(device)
+            # batch['d'] = batch['d'].to(device)
             batch['t'] = batch['t'].to(device)
             batch['input_x'] = batch['input_x'].to(device)
             batch['input_y'] = batch['input_y'].to(device)
@@ -95,7 +98,7 @@ def task1(args):
             batch['label_y'] = batch['label_y'].to(device)
             batch['len'] = batch['len'].to(device)
 
-            output = model(batch['d'], batch['t'], batch['input_x'], batch['input_y'], batch['time_delta'], batch['len'])
+            output = model(batch['t'], batch['input_x'], batch['input_y'], batch['time_delta'], batch['len'])
             label = torch.stack((batch['label_x'], batch['label_y']), dim=-1)
 
             pred_mask = (batch['input_x'] == 201)
