@@ -146,7 +146,7 @@ class FFNLayer(nn.Module):
 
 class LPBERT(nn.Module):
     def __init__(self, layers_num, heads_num, embed_size):
-        super(LPBERT, self).__init__()
+        super(LPBERT, self).__init__()  
 
         self.embedding_layer = EmbeddingLayer(embed_size)
         self.transformer_encoder = TransformerEncoderModel(layers_num, heads_num, embed_size)

@@ -81,7 +81,7 @@ class HuMobDatasetTask1Train(Dataset):
 
 class HuMobDatasetTask1Val(Dataset):
     def __init__(self, path):
-        self.df = pd.read_csv(path, encoding='latin1', error_bad_lines=False)
+        self.df = pd.read_csv(path, encoding='latin1')
 
 
 
