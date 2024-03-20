@@ -1,21 +1,22 @@
 import torch
 from torch import nn
 
-# class DayEmbeddingModel(nn.Module):
-#     '''
-#     0: <PAD>
-#     '''
-#     def __init__(self, embed_size):
-#         super(DayEmbeddingModel, self).__init__()
 
-#         self.day_embedding = nn.Embedding(
-#             num_embeddings=75+1,
-#             embedding_dim=embed_size,
-#         )
+class DayEmbeddingModel(nn.Module):
+    '''
+    0: <PAD>
+    '''
+    def __init__(self, embed_size):
+        super(DayEmbeddingModel, self).__init__()
 
-#     def forward(self, day):
-#         embed = self.day_embedding(day)
-#         return embed
+        self.day_embedding = nn.Embedding(
+            num_embeddings=15+2,
+            embedding_dim=embed_size,
+        )
+
+    def forward(self, day):
+        embed = self.day_embedding(day)
+        return embed
 
 
 class TimeEmbeddingModel(nn.Module):
@@ -79,7 +80,7 @@ class TimedeltaEmbeddingModel(nn.Module):
         super(TimedeltaEmbeddingModel, self).__init__()
 
         self.timedelta_embedding = nn.Embedding(
-            num_embeddings=48,
+            num_embeddings=80,
             embedding_dim=embed_size,
         )
 
@@ -92,22 +93,20 @@ class EmbeddingLayer(nn.Module):
     def __init__(self, embed_size):
         super(EmbeddingLayer, self).__init__()
 
-        # self.day_embedding = DayEmbeddingModel(embed_size)  # Referência comentada
-
+        self.day_embedding = DayEmbeddingModel(embed_size)
         self.time_embedding = TimeEmbeddingModel(embed_size)
         self.location_x_embedding = LocationXEmbeddingModel(embed_size)
         self.location_y_embedding = LocationYEmbeddingModel(embed_size)
         self.timedelta_embedding = TimedeltaEmbeddingModel(embed_size)
 
-    def forward(self, time, location_x, location_y, timedelta):
-        # day_embed = self.day_embedding(day)  # Referência comentada
+    def forward(self, day, time, location_x, location_y, timedelta):
+        day_embed = self.day_embedding(day)
         time_embed = self.time_embedding(time)
         location_x_embed = self.location_x_embedding(location_x)
         location_y_embed = self.location_y_embedding(location_y)
         timedelta_embed = self.timedelta_embedding(timedelta)
 
-        # embed = day_embed + time_embed + location_x_embed + location_y_embed + timedelta_embed  # Referência comentada
-        embed = time_embed + location_x_embed + location_y_embed + timedelta_embed
+        embed = day_embed + time_embed + location_x_embed + location_y_embed + timedelta_embed
         return embed
 
 
@@ -153,11 +152,11 @@ class LPBERT(nn.Module):
         self.transformer_encoder = TransformerEncoderModel(layers_num, heads_num, embed_size)
         self.ffn_layer = FFNLayer(embed_size)
 
-    def forward(self, time, location_x, location_y, timedelta, len):
-        embed = self.embedding_layer(time, location_x, location_y, timedelta)
+    def forward(self, day, time, location_x, location_y, timedelta, len):
+        embed = self.embedding_layer(day, time, location_x, location_y, timedelta)
         embed = embed.transpose(0, 1)
 
-        max_len = time.shape[-1]
+        max_len = day.shape[-1]
         indices = torch.arange(max_len, device=len.device).unsqueeze(0)
         src_key_padding_mask = ~(indices < len.unsqueeze(-1))
 
@@ -166,3 +165,4 @@ class LPBERT(nn.Module):
 
         output = self.ffn_layer(transformer_encoder_output)
         return output
+

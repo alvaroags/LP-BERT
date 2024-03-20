@@ -73,11 +73,10 @@ def task2(args):
                         filemode='w')
     writer = SummaryWriter(tensorboard_log_path)
 
-    task2_dataset_train = HuMobDatasetTask2Train('./data/yjmob100k-dataset2.csv')
+    task2_dataset_train = HuMobDatasetTask2Train('data/train.csv')
     task2_dataloader_train = DataLoader(task2_dataset_train, batch_size=args.batch_size, shuffle=True, collate_fn=collate_fn, num_workers=args.num_workers)
 
-    device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-
+    device = torch.device(f'cuda:{args.cuda}')
     model = LPBERT(args.layers_num, args.heads_num, args.embed_size).to(device)
 
     optimizer = torch.optim.Adam(model.parameters(), lr=args.lr)

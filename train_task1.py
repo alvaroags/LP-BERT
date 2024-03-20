@@ -25,8 +25,7 @@ def set_random_seed(seed=0):
 
 
 def collate_fn(batch):
-    # Comentando a parte relacionada ao dayembedding
-    # d = [item['d'] for item in batch]
+    d = [item['d'] for item in batch]
     t = [item['t'] for item in batch]
     input_x = [item['input_x'] for item in batch]
     input_y = [item['input_y'] for item in batch]
@@ -35,8 +34,7 @@ def collate_fn(batch):
     label_y = [item['label_y'] for item in batch]
     len_tensor = torch.tensor([item['len'] for item in batch])
 
-    # Comentando a parte relacionada ao dayembedding
-    # d_padded = pad_sequence(d, batch_first=True, padding_value=0)
+    d_padded = pad_sequence(d, batch_first=True, padding_value=0)
     t_padded = pad_sequence(t, batch_first=True, padding_value=0)
     input_x_padded = pad_sequence(input_x, batch_first=True, padding_value=0)
     input_y_padded = pad_sequence(input_y, batch_first=True, padding_value=0)
@@ -45,8 +43,7 @@ def collate_fn(batch):
     label_y_padded = pad_sequence(label_y, batch_first=True, padding_value=0)
 
     return {
-        # Comentando a parte relacionada ao dayembedding
-        # 'd': d_padded,
+        'd': d_padded,
         't': t_padded,
         'input_x': input_x_padded,
         'input_y': input_y_padded,
@@ -58,6 +55,7 @@ def collate_fn(batch):
 
 
 def task1(args):
+    max_x = 199
     name = f'batchsize{args.batch_size}_epochs{args.epochs}_embedsize{args.embed_size}_layersnum{args.layers_num}_headsnum{args.heads_num}_cuda{args.cuda}_lr{args.lr}_seed{args.seed}'
     current_time = datetime.datetime.now()
 
@@ -76,11 +74,10 @@ def task1(args):
                         filemode='w')
     writer = SummaryWriter(tensorboard_log_path)
 
-    task1_dataset_train = HuMobDatasetTask1Train('data/train.csv')
-    print(len(task1_dataset_train))
+    task1_dataset_train = HuMobDatasetTask1Train('./data/train_checkins_Connecticut.csv')
     task1_dataloader_train = DataLoader(task1_dataset_train, batch_size=args.batch_size, shuffle=True, collate_fn=collate_fn, num_workers=args.num_workers)
 
-    device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+    device = torch.device('cpu')
     model = LPBERT(args.layers_num, args.heads_num, args.embed_size).to(device)
 
     optimizer = torch.optim.Adam(model.parameters(), lr=args.lr)
@@ -89,7 +86,7 @@ def task1(args):
 
     for epoch_id in range(args.epochs):
         for batch_id, batch in enumerate(tqdm(task1_dataloader_train)):
-            # batch['d'] = batch['d'].to(device)
+            batch['d'] = batch['d'].to(device)
             batch['t'] = batch['t'].to(device)
             batch['input_x'] = batch['input_x'].to(device)
             batch['input_y'] = batch['input_y'].to(device)
@@ -98,12 +95,16 @@ def task1(args):
             batch['label_y'] = batch['label_y'].to(device)
             batch['len'] = batch['len'].to(device)
 
-            output = model(batch['t'], batch['input_x'], batch['input_y'], batch['time_delta'], batch['len'])
+            print(batch["d"].shape)
+            # print(batch["time_delta"])
+
+            output = model(batch['d'], batch['t'], batch['input_x'], batch['input_y'], batch['time_delta'], batch['len'])
             label = torch.stack((batch['label_x'], batch['label_y']), dim=-1)
 
-            pred_mask = (batch['input_x'] == 201)
-            pred_mask = torch.cat((pred_mask.unsqueeze(-1), pred_mask.unsqueeze(-1)), dim=-1)
+            #PRECISA SER ALTERADO PARA O VALOR DE X MÁXIMO DENTRO DO DATAFRAME
+            pred_mask = (batch['input_x'] == max_x   + 1)
 
+            pred_mask = torch.cat((pred_mask.unsqueeze(-1), pred_mask.unsqueeze(-1)), dim=-1)
             loss = criterion(output[pred_mask], label[pred_mask])
             loss.backward()
             optimizer.step()
@@ -122,7 +123,7 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument('--batch_size', type=int, default=16)
     parser.add_argument('--epochs', type=int, default=200)
-    parser.add_argument('--num_workers', type=int, default=2)
+    parser.add_argument('--num_workers', type=int, default=1)
     parser.add_argument('--embed_size', type=int, default=128)
     parser.add_argument('--layers_num', type=int, default=4)
     parser.add_argument('--heads_num', type=int, default=8)

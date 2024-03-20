@@ -9,8 +9,7 @@ from torch.utils.data import Dataset
 
 class HuMobDatasetTask1Train(Dataset):
     def __init__(self, path):
-        self.df = pd.read_csv(path, encoding='latin1')
-
+        self.df = pd.read_csv(path)
 
         self.d_array = []
         self.t_array = []
@@ -81,9 +80,7 @@ class HuMobDatasetTask1Train(Dataset):
 
 class HuMobDatasetTask1Val(Dataset):
     def __init__(self, path):
-        self.df = pd.read_csv(path, encoding='latin1')
-
-
+        self.df = pd.read_csv(path)
 
         self.d_array = []
         self.t_array = []
@@ -105,8 +102,8 @@ class HuMobDatasetTask1Val(Dataset):
             label_x = traj['x'].to_numpy()
             label_y = traj['y'].to_numpy()
 
-            mask_d_start = 60
-            mask_d_end = 74
+            mask_d_start = 14
+            mask_d_end = 25
             need_mask_idx = np.where((d >= mask_d_start) & (d <= mask_d_end))
             input_x[need_mask_idx] = 201
             input_y[need_mask_idx] = 201
