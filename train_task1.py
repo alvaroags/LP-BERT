@@ -72,9 +72,9 @@ def task1(args):
                         datefmt='%Y-%m-%d %H:%M:%S',
                         filename=os.path.join(log_path, f'{current_time.strftime("%Y_%m_%d_%H_%M_%S")}.txt'),
                         filemode='w')
-    writer = SummaryWriter(tensorboard_log_path)
+    writer = SummaryWriter(tensorboard_log_path)    
 
-    task1_dataset_train = HuMobDatasetTask1Train('./data/train_checkins_Connecticut.csv')
+    task1_dataset_train = HuMobDatasetTask1Train('./data/train/train_checkins_Connecticut.csv')
     task1_dataloader_train = DataLoader(task1_dataset_train, batch_size=args.batch_size, shuffle=True, collate_fn=collate_fn, num_workers=args.num_workers)
 
     device = torch.device('cpu')
