@@ -74,7 +74,7 @@ def task1(args):
                         filemode='w')
     writer = SummaryWriter(tensorboard_log_path)    
 
-    task1_dataset_train = HuMobDatasetTask1Train('./data/train/train_checkins_Connecticut.csv')
+    task1_dataset_train = HuMobDatasetTask1Train('./data/train/sample_train_Alaska.csv')
     task1_dataloader_train = DataLoader(task1_dataset_train, batch_size=args.batch_size, shuffle=True, collate_fn=collate_fn, num_workers=args.num_workers)
 
     device = torch.device('cpu')
@@ -95,14 +95,14 @@ def task1(args):
             batch['label_y'] = batch['label_y'].to(device)
             batch['len'] = batch['len'].to(device)
 
-            print(batch["d"].shape)
+            # print(batch["d"].shape)
             # print(batch["time_delta"])
 
             output = model(batch['d'], batch['t'], batch['input_x'], batch['input_y'], batch['time_delta'], batch['len'])
             label = torch.stack((batch['label_x'], batch['label_y']), dim=-1)
 
             #PRECISA SER ALTERADO PARA O VALOR DE X MÁXIMO DENTRO DO DATAFRAME
-            pred_mask = (batch['input_x'] == max_x   + 1)
+            pred_mask = (batch['input_x'] == max_x + 1)
 
             pred_mask = torch.cat((pred_mask.unsqueeze(-1), pred_mask.unsqueeze(-1)), dim=-1)
             loss = criterion(output[pred_mask], label[pred_mask])
