@@ -14,9 +14,8 @@ def task1(args):
     result_path = 'result/task1'
     os.makedirs(result_path, exist_ok=True)
 
-    task1_dataset_val = HuMobDatasetTask1Val('./data/test/test_checkins_Alaska.csv')
+    task1_dataset_val = HuMobDatasetTask1Val('./data/test/test_checkins_Nebraska.csv')
     task1_dataloader_val = DataLoader(task1_dataset_val, batch_size=1, num_workers=args.num_workers)
-
     device = torch.device('cpu')
     model = LPBERT(args.layers_num, args.heads_num, args.embed_size).to(device)
     model.load_state_dict(torch.load(args.pth_file, map_location=device))
@@ -28,6 +27,7 @@ def task1(args):
     model.eval()
     with torch.no_grad():
         for data in tqdm(task1_dataloader_val):
+            print(data)
             data['d'] = data['d'].to(device)
             data['t'] = data['t'].to(device)
             data['input_x'] = data['input_x'].to(device)

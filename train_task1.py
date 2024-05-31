@@ -41,6 +41,7 @@ def collate_fn(batch):
     time_delta_padded = pad_sequence(time_delta, batch_first=True, padding_value=0)
     label_x_padded = pad_sequence(label_x, batch_first=True, padding_value=0)
     label_y_padded = pad_sequence(label_y, batch_first=True, padding_value=0)
+    
 
     return {
         'd': d_padded,
@@ -74,7 +75,7 @@ def task1(args):
                         filemode='w')
     writer = SummaryWriter(tensorboard_log_path)    
 
-    task1_dataset_train = HuMobDatasetTask1Train('./data/train/sample_train_Alaska.csv')
+    task1_dataset_train = HuMobDatasetTask1Train('./data/train/train_checkins_Nebraska.csv')
     task1_dataloader_train = DataLoader(task1_dataset_train, batch_size=args.batch_size, shuffle=True, collate_fn=collate_fn, num_workers=args.num_workers)
 
     device = torch.device('cpu')
