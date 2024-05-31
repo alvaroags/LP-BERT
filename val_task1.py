@@ -14,10 +14,9 @@ def task1(args):
     result_path = 'result/task1'
     os.makedirs(result_path, exist_ok=True)
 
-    task1_dataset_val = HuMobDatasetTask1Val('./data/task1_dataset_kotae.csv')
+    task1_dataset_val = HuMobDatasetTask1Val('./data/test/test_checkins_Nebraska.csv')
     task1_dataloader_val = DataLoader(task1_dataset_val, batch_size=1, num_workers=args.num_workers)
-
-    device = torch.device(f'cuda:{args.cuda}')
+    device = torch.device('cpu')
     model = LPBERT(args.layers_num, args.heads_num, args.embed_size).to(device)
     model.load_state_dict(torch.load(args.pth_file, map_location=device))
 
@@ -28,6 +27,7 @@ def task1(args):
     model.eval()
     with torch.no_grad():
         for data in tqdm(task1_dataloader_val):
+            print(data)
             data['d'] = data['d'].to(device)
             data['t'] = data['t'].to(device)
             data['input_x'] = data['input_x'].to(device)
@@ -40,8 +40,9 @@ def task1(args):
             output = model(data['d'], data['t'], data['input_x'], data['input_y'], data['time_delta'], data['len'])
             label = torch.stack((data['label_x'], data['label_y']), dim=-1)
 
-            assert torch.all((data['input_x'] == 201) == (data['input_y'] == 201))
-            pred_mask = (data['input_x'] == 201)
+            assert torch.all((data['input_x'] == 200) == (data['input_y'] == 94))
+            pred_mask = (data['input_x'] == 199)
+            # print("PRED_MASSKKKK", pred_mask)
             output = output[pred_mask]
             pred = []
             pre_x, pre_y = -1, -1

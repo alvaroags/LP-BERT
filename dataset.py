@@ -5,12 +5,13 @@ import numpy as np
 
 import torch
 from torch.utils.data import Dataset
+from tqdm import tqdm
+from torch.utils.data import Dataset
 
 
 class HuMobDatasetTask1Train(Dataset):
     def __init__(self, path):
         self.df = pd.read_csv(path)
-
         self.d_array = []
         self.t_array = []
         self.input_x_array = []
@@ -19,11 +20,9 @@ class HuMobDatasetTask1Train(Dataset):
         self.label_x_array = []
         self.label_y_array = []
         self.len_array = []
-
         for uid, traj in tqdm(self.df.groupby('uid')):
             if uid >= 80000:
-                traj = traj[traj['d'] < 60]
-
+                traj = traj[traj['d'] < 21]
             d = traj['d'].to_numpy()
             t = traj['t'].to_numpy()
             input_x = copy.deepcopy(traj['x'].to_numpy())
@@ -32,16 +31,14 @@ class HuMobDatasetTask1Train(Dataset):
             time_delta[time_delta > 47] = 47
             label_x = traj['x'].to_numpy()
             label_y = traj['y'].to_numpy()
-
             d_unique = np.unique(d)
-            if len(d_unique[(d_unique >= np.min(d_unique)) & (d_unique <= np.max(d_unique) - 14)]) == 0:
+            if len(d_unique[(d_unique >= np.min(d_unique)) & (d_unique <= np.max(d_unique) - 19)]) == 0:
                 continue
-            mask_d_start = np.random.choice(d_unique[(d_unique >= np.min(d_unique)) & (d_unique <= np.max(d_unique) - 14)])
-            mask_d_end = mask_d_start + 14
+            mask_d_start = np.random.choice(d_unique[(d_unique >= np.min(d_unique)) & (d_unique <= np.max(d_unique) - 19)])
+            mask_d_end = mask_d_start + 19
             need_mask_idx = np.where((d >= mask_d_start) & (d <= mask_d_end))
-            input_x[need_mask_idx] = 201
-            input_y[need_mask_idx] = 201
-
+            input_x[need_mask_idx] = 199
+            input_y[need_mask_idx] = 199
             self.d_array.append(d + 1)
             self.t_array.append(t + 1)
             self.input_x_array.append(input_x)
@@ -50,12 +47,9 @@ class HuMobDatasetTask1Train(Dataset):
             self.label_x_array.append(label_x - 1)
             self.label_y_array.append(label_y - 1)
             self.len_array.append(len(d))
-
         self.len_array = np.array(self.len_array, dtype=np.int64)
-
     def __len__(self):
         return len(self.d_array)
-
     def __getitem__(self, index):
         d = torch.tensor(self.d_array[index])
         t = torch.tensor(self.t_array[index])
@@ -65,7 +59,6 @@ class HuMobDatasetTask1Train(Dataset):
         label_x = torch.tensor(self.label_x_array[index])
         label_y = torch.tensor(self.label_y_array[index])
         len = torch.tensor(self.len_array[index])
-
         return {
             'd': d,
             't': t,
@@ -81,7 +74,6 @@ class HuMobDatasetTask1Train(Dataset):
 class HuMobDatasetTask1Val(Dataset):
     def __init__(self, path):
         self.df = pd.read_csv(path)
-
         self.d_array = []
         self.t_array = []
         self.input_x_array = []
@@ -90,8 +82,7 @@ class HuMobDatasetTask1Val(Dataset):
         self.label_x_array = []
         self.label_y_array = []
         self.len_array = []
-
-        self.df = self.df[self.df['uid'] >= 80000]
+        self.df = self.df[self.df['uid'] >= 800]
         for uid, traj in tqdm(self.df.groupby('uid')):
             d = traj['d'].to_numpy()
             t = traj['t'].to_numpy()
@@ -101,13 +92,11 @@ class HuMobDatasetTask1Val(Dataset):
             time_delta[time_delta > 47] = 47
             label_x = traj['x'].to_numpy()
             label_y = traj['y'].to_numpy()
-
-            mask_d_start = 14
-            mask_d_end = 25
+            mask_d_start = 16
+            mask_d_end = 30
             need_mask_idx = np.where((d >= mask_d_start) & (d <= mask_d_end))
-            input_x[need_mask_idx] = 201
-            input_y[need_mask_idx] = 201
-
+            input_x[need_mask_idx] = 199
+            input_y[need_mask_idx] = 199
             self.d_array.append(d + 1)
             self.t_array.append(t + 1)
             self.input_x_array.append(input_x)
@@ -116,12 +105,9 @@ class HuMobDatasetTask1Val(Dataset):
             self.label_x_array.append(label_x - 1)
             self.label_y_array.append(label_y - 1)
             self.len_array.append(len(d))
-
         self.len_array = np.array(self.len_array, dtype=np.int64)
-
     def __len__(self):
         return len(self.d_array)
-
     def __getitem__(self, index):
         d = torch.tensor(self.d_array[index])
         t = torch.tensor(self.t_array[index])
@@ -131,7 +117,6 @@ class HuMobDatasetTask1Val(Dataset):
         label_x = torch.tensor(self.label_x_array[index])
         label_y = torch.tensor(self.label_y_array[index])
         len = torch.tensor(self.len_array[index])
-
         return {
             'd': d,
             't': t,
@@ -157,8 +142,9 @@ class HuMobDatasetTask2Train(Dataset):
         self.label_y_array = []
         self.len_array = []
 
-        for uid, traj in tqdm(self.df.groupby('uid')):
-            if uid >= 22500:
+        for uid in tqdm(self.df['uid'].unique()):
+            traj = self.df[self.df['uid'] == uid]
+            if uid >= 2250:
                 traj = traj[traj['d'] < 60]
 
             d = traj['d'].to_numpy()
@@ -176,8 +162,8 @@ class HuMobDatasetTask2Train(Dataset):
             mask_d_start = np.random.choice(d_unique[(d_unique >= np.min(d_unique)) & (d_unique <= np.max(d_unique) - 14)])
             mask_d_end = mask_d_start + 14
             need_mask_idx = np.where((d >= mask_d_start) & (d <= mask_d_end))
-            input_x[need_mask_idx] = 201
-            input_y[need_mask_idx] = 201
+            input_x[need_mask_idx] = 199
+            input_y[need_mask_idx] = 199
 
             self.d_array.append(d + 1)
             self.t_array.append(t + 1)

@@ -41,6 +41,7 @@ def collate_fn(batch):
     time_delta_padded = pad_sequence(time_delta, batch_first=True, padding_value=0)
     label_x_padded = pad_sequence(label_x, batch_first=True, padding_value=0)
     label_y_padded = pad_sequence(label_y, batch_first=True, padding_value=0)
+    
 
     return {
         'd': d_padded,
@@ -55,6 +56,7 @@ def collate_fn(batch):
 
 
 def task1(args):
+    max_x = 199
     name = f'batchsize{args.batch_size}_epochs{args.epochs}_embedsize{args.embed_size}_layersnum{args.layers_num}_headsnum{args.heads_num}_cuda{args.cuda}_lr{args.lr}_seed{args.seed}'
     current_time = datetime.datetime.now()
 
@@ -71,11 +73,9 @@ def task1(args):
                         datefmt='%Y-%m-%d %H:%M:%S',
                         filename=os.path.join(log_path, f'{current_time.strftime("%Y_%m_%d_%H_%M_%S")}.txt'),
                         filemode='w')
-    writer = SummaryWriter(tensorboard_log_path)
+    writer = SummaryWriter(tensorboard_log_path)    
 
-    task1_dataset_train = HuMobDatasetTask1Train('./data/train.csv')
-    print(task1_dataset_train[0]["time_delta"].shape)
-    print(task1_dataset_train[0]["d"].shape)
+    task1_dataset_train = HuMobDatasetTask1Train('./data/train/train_checkins_Nebraska.csv')
     task1_dataloader_train = DataLoader(task1_dataset_train, batch_size=args.batch_size, shuffle=True, collate_fn=collate_fn, num_workers=args.num_workers)
 
     device = torch.device('cpu')
@@ -96,15 +96,16 @@ def task1(args):
             batch['label_y'] = batch['label_y'].to(device)
             batch['len'] = batch['len'].to(device)
 
-            print(batch["d"].shape)
+            # print(batch["d"].shape)
             # print(batch["time_delta"])
 
             output = model(batch['d'], batch['t'], batch['input_x'], batch['input_y'], batch['time_delta'], batch['len'])
             label = torch.stack((batch['label_x'], batch['label_y']), dim=-1)
 
-            pred_mask = (batch['input_x'] == 201)
-            pred_mask = torch.cat((pred_mask.unsqueeze(-1), pred_mask.unsqueeze(-1)), dim=-1)
+            #PRECISA SER ALTERADO PARA O VALOR DE X MÁXIMO DENTRO DO DATAFRAME
+            pred_mask = (batch['input_x'] == max_x + 1)
 
+            pred_mask = torch.cat((pred_mask.unsqueeze(-1), pred_mask.unsqueeze(-1)), dim=-1)
             loss = criterion(output[pred_mask], label[pred_mask])
             loss.backward()
             optimizer.step()
