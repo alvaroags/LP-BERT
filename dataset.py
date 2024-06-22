@@ -21,8 +21,8 @@ class HuMobDatasetTask1Train(Dataset):
         self.label_y_array = []
         self.len_array = []
         for uid, traj in tqdm(self.df.groupby('uid')):
-            if uid >= 80000:
-                traj = traj[traj['d'] < 21]
+            # if uid >= 80000:
+            #     traj = traj[traj['d'] < 23]
             d = traj['d'].to_numpy()
             t = traj['t'].to_numpy()
             input_x = copy.deepcopy(traj['x'].to_numpy())
@@ -32,10 +32,10 @@ class HuMobDatasetTask1Train(Dataset):
             label_x = traj['x'].to_numpy()
             label_y = traj['y'].to_numpy()
             d_unique = np.unique(d)
-            if len(d_unique[(d_unique >= np.min(d_unique)) & (d_unique <= np.max(d_unique) - 19)]) == 0:
+            if len(d_unique[(d_unique >= np.min(d_unique)) & (d_unique <= np.max(d_unique) - 25)]) == 0:
                 continue
-            mask_d_start = np.random.choice(d_unique[(d_unique >= np.min(d_unique)) & (d_unique <= np.max(d_unique) - 19)])
-            mask_d_end = mask_d_start + 19
+            mask_d_start = np.random.choice(d_unique[(d_unique >= np.min(d_unique)) & (d_unique <= np.max(d_unique) - 25)])
+            mask_d_end = mask_d_start + 10
             need_mask_idx = np.where((d >= mask_d_start) & (d <= mask_d_end))
             input_x[need_mask_idx] = 199
             input_y[need_mask_idx] = 199
@@ -92,8 +92,8 @@ class HuMobDatasetTask1Val(Dataset):
             time_delta[time_delta > 47] = 47
             label_x = traj['x'].to_numpy()
             label_y = traj['y'].to_numpy()
-            mask_d_start = 16
-            mask_d_end = 30
+            mask_d_start = 15
+            mask_d_end = 22
             need_mask_idx = np.where((d >= mask_d_start) & (d <= mask_d_end))
             input_x[need_mask_idx] = 199
             input_y[need_mask_idx] = 199

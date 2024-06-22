@@ -3,7 +3,7 @@ import geobleu
 import pandas as pd
 
 
-with open('2024_05_28_08_05_43.json', 'r') as f:
+with open('/home/alvaro/Documentos/GitHub/LP-BERT/result/task1/2024_06_18_13_46_49.json', 'r') as f:
     data = json.load(f)
 
 all_trajectories = {"generated": [], "reference": []}
@@ -29,5 +29,5 @@ reference = all_trajectories['reference']
 geobleu_val = geobleu.calc_geobleu(generated, reference)
 dtw_val = geobleu.calc_dtw(generated, reference)
 
-print(geobleu_val)
-print(dtw_val)
+print('Resultado GeoBleu: ', geobleu_val)
+print('Resultado DTW: ', dtw_val)

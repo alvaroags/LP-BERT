@@ -166,4 +166,3 @@ class LPBERT(nn.Module):
 
         output = self.ffn_layer(transformer_encoder_output)
         return output
-
