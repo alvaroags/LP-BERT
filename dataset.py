@@ -32,10 +32,10 @@ class HuMobDatasetTask1Train(Dataset):
             label_x = traj['x'].to_numpy()
             label_y = traj['y'].to_numpy()
             d_unique = np.unique(d)
-            if len(d_unique[(d_unique >= np.min(d_unique)) & (d_unique <= np.max(d_unique) - 25)]) == 0:
+            if len(d_unique[(d_unique >= np.min(d_unique)) & (d_unique <= np.max(d_unique) - 10)]) == 0:
                 continue
-            mask_d_start = np.random.choice(d_unique[(d_unique >= np.min(d_unique)) & (d_unique <= np.max(d_unique) - 25)])
-            mask_d_end = mask_d_start + 10
+            mask_d_start = np.random.choice(d_unique[(d_unique >= np.min(d_unique)) & (d_unique <= np.max(d_unique) - 10)])
+            mask_d_end = mask_d_start + 8
             need_mask_idx = np.where((d >= mask_d_start) & (d <= mask_d_end))
             input_x[need_mask_idx] = 199
             input_y[need_mask_idx] = 199

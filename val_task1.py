@@ -14,8 +14,8 @@ def task1(args):
     result_path = 'result/task1'
     os.makedirs(result_path, exist_ok=True)
 
-    task1_dataset_val = HuMobDatasetTask1Val('./data/test/test2_checkins_Nebraska.csv')
-    task1_dataloader_val = DataLoader(task1_dataset_val, batch_size=1, num_workers=args.num_workers)
+    task1_dataset_val = HuMobDatasetTask1Val('./data/test/test2_checkins_Alaska.csv')
+    task1_dataloader_val = DataLoader(task1_dataset_val, batch_size=1, num_workers=4)
     device = torch.device('cpu')
     model = LPBERT(args.layers_num, args.heads_num, args.embed_size).to(device)
     model.load_state_dict(torch.load(args.pth_file, map_location=device))
@@ -27,23 +27,30 @@ def task1(args):
     model.eval()
     with torch.no_grad():
         for data in tqdm(task1_dataloader_val):
-            # print(data)
-            data['d'] = data['d'].to(device)
-            data['t'] = data['t'].to(device)
-            data['input_x'] = data['input_x'].to(device)
-            data['input_y'] = data['input_y'].to(device)
-            data['time_delta'] = data['time_delta'].to(device)
-            data['label_x'] = data['label_x'].to(device)
-            data['label_y'] = data['label_y'].to(device)
-            data['len'] = data['len'].to(device)
+            # Move os dados para o dispositivo
+            data = {k: v.to(device) for k, v in data.items()}
+            
+            # Log das formas dos tensores
+            for k, v in data.items():
+                print(f"{k} shape: {v.shape}")
 
             output = model(data['d'], data['t'], data['input_x'], data['input_y'], data['time_delta'], data['len'])
             label = torch.stack((data['label_x'], data['label_y']), dim=-1)
 
-            assert torch.all((data['input_x'] == 200) == (data['input_y'] == 94))
+            assert torch.all((data['input_x'] == 200) == (data['input_y'] == 94)), "Mismatched input values"
+
             pred_mask = (data['input_x'] == 199)
-            # print("PRED_MASSKKKK", pred_mask)
+
+            # Verificar a máscara
+            print(f"pred_mask shape: {pred_mask.shape}")
+            print(f"pred_mask sample values: {pred_mask[:10]}")
+            print(f"Number of True values in pred_mask: {pred_mask.sum().item()}")
+
             output = output[pred_mask]
+            
+            # Log da forma do tensor de saída e da máscara
+            print(f"output shape after masking: {output.shape}")
+
             pred = []
             pre_x, pre_y = -1, -1
             for step in range(len(output)):
@@ -55,6 +62,10 @@ def task1(args):
                 pre_x, pre_y = pred[-1][0].item(), pred[-1][1].item()
 
             pred = torch.stack(pred)
+            
+            # Log da forma do tensor pred
+            print(f"pred shape: {pred.shape}")
+
             generated = torch.cat((data['d'][pred_mask].unsqueeze(-1)-1, data['t'][pred_mask].unsqueeze(-1)-1, pred+1), dim=-1).cpu().tolist()
             generated = [tuple(x) for x in generated]
 
@@ -67,6 +78,8 @@ def task1(args):
     current_time = datetime.datetime.now()
     with open(os.path.join(result_path, f'{current_time.strftime("%Y_%m_%d_%H_%M_%S")}.json'), 'w') as file:
         json.dump(result, file)
+
+    print("Resultados salvos em:", os.path.join(result_path, f'{current_time.strftime("%Y_%m_%d_%H_%M_%S")}.json'))
 
 
 if __name__ == '__main__':

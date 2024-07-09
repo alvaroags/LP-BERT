@@ -75,8 +75,9 @@ def task1(args):
                         filemode='w')
     writer = SummaryWriter(tensorboard_log_path)    
 
-    task1_dataset_train = HuMobDatasetTask1Train('./data/train/train2_checkins_Alaska.csv')
-    task1_dataloader_train = DataLoader(task1_dataset_train, batch_size=args.batch_size, shuffle=True, collate_fn=collate_fn, num_workers=args.num_workers)
+    task1_dataset_train = HuMobDatasetTask1Train('./data/train/train2_checkins_Nebraska.csv')
+    task1_dataloader_train = DataLoader(task1_dataset_train, batch_size=args.batch_size, shuffle=True, collate_fn=collate_fn, num_workers=args.num_workers, pin_memory=True, prefetch_factor=2)
+
 
     device = torch.device('cpu')
     model = LPBERT(args.layers_num, args.heads_num, args.embed_size).to(device)
@@ -103,7 +104,7 @@ def task1(args):
             label = torch.stack((batch['label_x'], batch['label_y']), dim=-1)
 
             #PRECISA SER ALTERADO PARA O VALOR DE X MÁXIMO DENTRO DO DATAFRAME
-            pred_mask = (batch['input_x'] == max_x + 1)
+            pred_mask = (batch['input_x'] == max_x)
 
             pred_mask = torch.cat((pred_mask.unsqueeze(-1), pred_mask.unsqueeze(-1)), dim=-1)
             loss = criterion(output[pred_mask], label[pred_mask])
