@@ -37,9 +37,9 @@ def task1(args):
             output = model(data['d'], data['t'], data['input_x'], data['input_y'], data['time_delta'], data['len'])
             label = torch.stack((data['label_x'], data['label_y']), dim=-1)
 
-            assert torch.all((data['input_x'] == 200) == (data['input_y'] == 94)), "Mismatched input values"
+            assert torch.all((data['input_x'] == 200) == (data['input_y'] == 200)), "Mismatched input values"
 
-            pred_mask = (data['input_x'] == 199)
+            pred_mask = (data['input_x'] == 200)
 
             # Verificar a máscara
             print(f"pred_mask shape: {pred_mask.shape}")

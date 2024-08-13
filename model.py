@@ -10,7 +10,7 @@ class DayEmbeddingModel(nn.Module):
         super(DayEmbeddingModel, self).__init__()
 
         self.day_embedding = nn.Embedding(
-            num_embeddings=93+2,
+            num_embeddings=12+2,
             embedding_dim=embed_size,
         )
 
@@ -81,7 +81,7 @@ class TimedeltaEmbeddingModel(nn.Module):
         super(TimedeltaEmbeddingModel, self).__init__()
 
         self.timedelta_embedding = nn.Embedding(
-            num_embeddings=80,
+            num_embeddings=48,
             embedding_dim=embed_size,
         )
 

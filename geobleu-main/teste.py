@@ -3,7 +3,7 @@ import geobleu
 import pandas as pd
 
 
-with open('/home/alvaro/Documentos/GitHub/LP-BERT/result/task1/2024_07_09_07_33_55.json', 'r') as f:
+with open('/home/alvaro/Documentos/GitHub/LP-BERT/result/task1/2024_08_13_08_45_04.json', 'r') as f:
     data = json.load(f)
 
 all_trajectories = {"generated": [], "reference": []}

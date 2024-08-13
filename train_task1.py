@@ -56,7 +56,7 @@ def collate_fn(batch):
 
 
 def task1(args):
-    max_x = 199
+    max_x = 200
     name = f'batchsize{args.batch_size}_epochs{args.epochs}_embedsize{args.embed_size}_layersnum{args.layers_num}_headsnum{args.heads_num}_cuda{args.cuda}_lr{args.lr}_seed{args.seed}'
     current_time = datetime.datetime.now()
 
@@ -75,7 +75,7 @@ def task1(args):
                         filemode='w')
     writer = SummaryWriter(tensorboard_log_path)    
 
-    task1_dataset_train = HuMobDatasetTask1Train('./data/train/train2_checkins_Nebraska.csv')
+    task1_dataset_train = HuMobDatasetTask1Train('./data/train/train2_checkins_Alaska.csv')
     task1_dataloader_train = DataLoader(task1_dataset_train, batch_size=args.batch_size, shuffle=True, collate_fn=collate_fn, num_workers=args.num_workers, pin_memory=True, prefetch_factor=2)
 
 
